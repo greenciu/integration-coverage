@@ -108,6 +108,11 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<includes>
+						<include>com.playground.osgi.integration.coverage.service.*</include>
+					</includes>
+				</configuration>
 				<executions>
 					<execution>
 						<id>prepare</id>
@@ -119,7 +124,6 @@
 							<append>true</append>
 							<dumpOnExit>true</dumpOnExit>
 							<propertyName>jacoco.agent.arg</propertyName>
-							<append>true</append>
 						</configuration>
 					</execution>
 					<execution>
@@ -129,6 +133,15 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>check</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules />
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<!-- Run the JUnit integration tests in an isolated classloader. -->
@@ -137,6 +150,7 @@
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<inherited>true</inherited>
 				<configuration>
+					<forkCount>1</forkCount>
 					<trimStackTrace>false</trimStackTrace>
 					<disableXmlReport>false</disableXmlReport>
 					<reportFormat>xml</reportFormat>

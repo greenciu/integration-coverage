@@ -90,6 +90,8 @@ public class KarafITest {
 					.unpackDirectory(new File("target/exam")).useDeployFolder(false),
 				keepRuntimeFolder(),
 				KarafDistributionOption.features(karafStandardRepo, "standard"),
+				KarafDistributionOption.features(karafStandardRepo, "spring"),
+				KarafDistributionOption.features(karafStandardRepo, "spring-dm"),
 				KarafDistributionOption.features(integrationCoverageFeatureRepo, "integration-coverage"),
 //				mavenBundle().groupId("com.playground.osgi").artifactId("integration-coverage-service").versionAsInProject().start(),
 				logLevel(LogLevelOption.LogLevel.INFO),
@@ -113,7 +115,9 @@ public class KarafITest {
 
 	@Test
 	public void check3Service() {
-		helloService.sayHello();
+		for (int i = 0; i < 5; i++) {
+			helloService.sayHello();
+		}
 	}
 
 	private void checkBundle(String symbolicName) {
