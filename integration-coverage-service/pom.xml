@@ -28,6 +28,12 @@
 						<Spring-Context>
 							META-INF/spring/context.xml
 						</Spring-Context>
+						<Export-Package>
+							com.playground.osgi.integration.coverage.service
+						</Export-Package>
+						<Private-Package>
+							com.playground.osgi.integration.coverage.service.impl
+						</Private-Package>
 					</instructions>
 				</configuration>
 				<!-- generate manifest automatically once the classes are processed -->
