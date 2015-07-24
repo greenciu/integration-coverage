@@ -22,22 +22,7 @@
 				<filtering>true</filtering>
 			</testResource>
 		</testResources>
-		<plugins>
-			<!-- Needed if you use versionAsInProject() -->
-			<plugin>
-				<groupId>org.apache.servicemix.tooling</groupId>
-				<artifactId>depends-maven-plugin</artifactId>
-				<version>1.2</version>
-				<executions>
-					<execution>
-						<id>generate-depends-file</id>
-						<goals>
-							<goal>generate-depends-file</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
+
 		<pluginManagement>
 			<plugins>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
@@ -76,6 +61,87 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
+
+		<plugins>
+			<!-- Needed if you use versionAsInProject() -->
+			<plugin>
+				<groupId>org.apache.servicemix.tooling</groupId>
+				<artifactId>depends-maven-plugin</artifactId>
+				<version>1.2</version>
+				<executions>
+					<execution>
+						<id>generate-depends-file</id>
+						<goals>
+							<goal>generate-depends-file</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-dependencies</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<includeGroupIds>com.playground.osgi</includeGroupIds>
+					<excludeTypes>xml</excludeTypes>
+					<failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<dependencies>
+					<dependency>
+						<groupId>ant-contrib</groupId>
+						<artifactId>ant-contrib</artifactId>
+						<version>20020829</version>
+					</dependency>
+					<dependency>
+						<groupId>org.jacoco</groupId>
+						<artifactId>org.jacoco.ant</artifactId>
+						<version>${jacoco.version}</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<phase>site</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<target>
+						<taskdef classpathref="maven.plugin.classpath" classname="org.jacoco.ant.ReportTask"
+							name="jacoco:report" />
+						<jacoco:report xmlns:jacoco="antlib:org.jacoco.ant">
+							<executiondata>
+								<file file="${project.basedir}/target/jacoco-it.exec" />
+							</executiondata>
+							<structure name="JaCoCo">
+								<classfiles>
+									<fileset dir="${project.build.directory}/dependency" />
+								</classfiles>
+								<sourcefiles encoding="UTF-8">
+									<fileset dir="${project.build.directory}/dependency" />
+								</sourcefiles>
+							</structure>
+							<html destdir="${project.build.directory}/site/jacoco-it/" />
+							<xml destfile="${project.build.directory}/site/jacoco-it/jacoco.xml" />
+							<csv destfile="${project.build.directory}/site/jacoco-it/jacoco.csv" />
+						</jacoco:report>
+					</target>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 
 	<dependencies>
@@ -83,6 +149,23 @@
 			<groupId>com.playground.osgi</groupId>
 			<artifactId>integration-coverage-service</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.playground.osgi</groupId>
+			<artifactId>integration-coverage-service</artifactId>
+			<version>${project.version}</version>
+			<classifier>sources</classifier>
+			<scope>test</scope>
 			<exclusions>
 				<exclusion>
 					<artifactId>slf4j-log4j12</artifactId>
@@ -109,32 +192,18 @@
 			<artifactId>pax-exam-container-karaf</artifactId>
 			<version>${pax.exam.version}</version>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-api</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-				</exclusion>
-			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.exam</groupId>
+			<artifactId>pax-exam-link-mvn</artifactId>
+			<version>${pax.exam.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
 			<artifactId>pax-exam-junit4</artifactId>
 			<version>${pax.exam.version}</version>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-api</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.exam</groupId>
@@ -154,16 +223,6 @@
 			<groupId>org.apache.karaf.shell</groupId>
 			<artifactId>org.apache.karaf.shell.console</artifactId>
 			<version>${karaf.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-api</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.karaf.features</groupId>
@@ -188,14 +247,6 @@
 				<exclusion>
 					<groupId>org.eclipse</groupId>
 					<artifactId>org.eclipse.osgi</artifactId>
-				</exclusion>
-				<exclusion>
-					<artifactId>slf4j-api</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
